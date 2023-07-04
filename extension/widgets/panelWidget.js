@@ -186,6 +186,13 @@ class PanelWidget extends PanelMenu.Button {
 
 		let ongoingFact = getOngoingFact(facts);
 
+        if (this.warningTimeout) {
+            GLib.source_remove(this.warningTimeout);
+		}
+		if (!ongoingFact) {
+            this.warningTimeout = GLib.timeout_add_seconds(0, 1, this._warningRefresh.bind(this));
+		}
+
 		this.updatePanelDisplay(ongoingFact);
 		this.factsBox.refresh(facts, ongoingFact);
 	}
@@ -260,6 +267,16 @@ class PanelWidget extends PanelMenu.Button {
                 this.panelLabel.show();
                 break;
         }
+    }
+
+    /**
+     * Toggle an attention grabbing warning
+     */
+    _warningRefresh() {
+        const noActivity = _("No activity");
+        const newText = this.panelLabel.get_text() !== noActivity ? noActivity : noActivity + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+        this.panelLabel.set_text(newText);
+        return GLib.SOURCE_CONTINUE;
     }
 
     /**
